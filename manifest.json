@@ -1,0 +1,35 @@
+{
+  "manifest_version": 3,
+  "name": "CloudRadar \u2014 AWS \u00b7 GCP \u00b7 Azure Monitor",
+  "short_name": "CloudRadar",
+  "description": "Monitor AWS, GCP, and Azure region status in real time, grouped by continent. 72 regions covered.",
+  "version": "2.0.2",
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    },
+    "default_title": "CloudRadar"
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "permissions": [
+    "storage",
+    "alarms",
+    "notifications"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ],
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'none'; base-uri 'none';"
+  }
+}

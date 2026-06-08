@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="es" id="html-root">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CloudRadar</title>
+<link rel="stylesheet" href="popup.css">
+</head>
+<body>
+
+<div id="app">
+
+  <header class="header">
+    <div class="header-brand">
+      <div class="brand-icon-wrap">
+        <svg class="brand-icon" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Radar rings -->
+          <circle cx="16" cy="16" r="14" stroke="#FF9900" stroke-width="1.2" opacity="0.25" fill="none"/>
+          <circle cx="16" cy="16" r="9"  stroke="#FF9900" stroke-width="1.2" opacity="0.50" fill="none"/>
+          <circle cx="16" cy="16" r="4"  stroke="#FF9900" stroke-width="1.5" opacity="0.85" fill="none"/>
+          <!-- Center dot -->
+          <circle cx="16" cy="16" r="2"  fill="#FF9900"/>
+          <!-- Sweep lines -->
+          <line x1="16" y1="16" x2="27" y2="5"  stroke="#FF9900" stroke-width="1" opacity="0.5"/>
+          <line x1="16" y1="16" x2="5"  y2="27" stroke="#FF9900" stroke-width="1" opacity="0.5"/>
+        </svg>
+      </div>
+      <span class="brand-name">CloudRadar</span>
+      <span class="brand-tag">Multi-Cloud</span>
+    </div>
+    <div class="header-actions">
+      <button id="btn-refresh" class="icon-btn" title="Refresh">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2v6h-6"/><path d="M3 12a9 9 0 0115-6.7L21 8"/><path d="M3 22v-6h6"/><path d="M21 12a9 9 0 01-15 6.7L3 16"/></svg>
+      </button>
+      <button id="btn-settings" class="icon-btn" title="Settings">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <div class="hero-summary" id="summary-bar">
+    <div class="summary-dot" id="summary-dot"></div>
+    <div class="summary-text-wrap">
+      <span id="summary-text">Checking regions…</span>
+      <span class="summary-time" id="summary-time"></span>
+    </div>
+    <div class="summary-stats">
+      <span class="stat-pill ok-stat"    id="stat-ok">   <span class="dot"></span><span id="stat-ok-n">–</span></span>
+      <span class="stat-pill minor-stat" id="stat-minor"><span class="dot"></span><span id="stat-minor-n">–</span></span>
+      <span class="stat-pill major-stat" id="stat-major"><span class="dot"></span><span id="stat-major-n">–</span></span>
+      <span class="stat-total" id="stat-total">– reg.</span>
+    </div>
+  </div>
+
+  <div class="filter-tabs" role="tablist">
+    <button class="tab active" data-filter="all"         role="tab" aria-selected="true" >Todas</button>
+    <button class="tab"        data-filter="ok"          role="tab" aria-selected="false">Operational</button>
+    <button class="tab"        data-filter="issues"      role="tab" aria-selected="false">Incidents</button>
+  </div>
+  <div class="provider-tabs" role="tablist">
+    <button class="ptab active" data-provider="all"   role="tab" aria-selected="true">Todos</button>
+    <button class="ptab"        data-provider="aws"   role="tab" aria-selected="false">AWS</button>
+    <button class="ptab"        data-provider="gcp"   role="tab" aria-selected="false">GCP</button>
+    <button class="ptab"        data-provider="azure" role="tab" aria-selected="false">Azure</button>
+  </div>
+
+  <div class="search-wrap">
+    <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+    <input type="search" id="search-input" placeholder="Search region…" aria-label="Search region">
+  </div>
+
+  <main class="services-list" id="services-list" role="list" aria-live="polite">
+    <div class="loading-state" id="loading-state" aria-live="polite">
+      <div class="spinner" aria-hidden="true"></div>
+      <span>Loading region status…</span>
+    </div>
+  </main>
+
+  <!-- SETTINGS PANEL -->
+  <div class="panel-settings" id="panel-settings">
+    <div class="settings-header">
+      <span>Settings</span>
+      <button class="icon-btn" id="btn-settings-close" title="Cerrar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+
+    <div class="settings-section-title">Apariencia</div>
+    <div class="theme-toggle-row">
+      <div>
+        <div class="setting-label">Theme</div>
+        <div class="setting-sublabel">Toggle dark / light mode</div>
+      </div>
+      <div class="theme-btn-group">
+        <button class="theme-btn active" id="btn-theme-dark">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+          <span>Oscuro</span>
+        </button>
+        <button class="theme-btn" id="btn-theme-light">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+          <span>Claro</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="settings-section-title">Monitoreo</div>
+    <label class="setting-row">
+      <div>
+        <div class="setting-label">Check interval</div>
+        <div class="setting-sublabel">Automatic update frequency</div>
+      </div>
+      <select id="select-interval">
+        <option value="1">1 min</option>
+        <option value="5" selected>5 min</option>
+        <option value="15">15 min</option>
+        <option value="30">30 min</option>
+      </select>
+    </label>
+
+    <div class="settings-section-title">Information</div>
+    <div class="setting-row" style="flex-direction:column;align-items:flex-start;gap:6px;padding:12px 16px;">
+      <div class="setting-label">Fuente de datos</div>
+      <div class="setting-sublabel">Datos en tiempo real de AWS, GCP y Azure</div>
+      <a href="https://status.aws.amazon.com" target="_blank" rel="noopener" class="ext-link-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+        AWS Health Dashboard
+      </a>
+      <a href="https://status.cloud.google.com" target="_blank" rel="noopener" class="ext-link-btn" style="margin-top:6px">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+        GCP Status Dashboard
+      </a>
+      <a href="https://azure.status.microsoft/en-us/status" target="_blank" rel="noopener" class="ext-link-btn" style="margin-top:6px">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+        Azure Status Dashboard
+      </a>
+    </div>
+
+    <button class="export-btn" id="btn-export">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+      Copiar resumen
+    </button>
+
+    <a href="https://ko-fi.com/zaicone" target="_blank" rel="noopener" class="donate-btn" id="btn-donate">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+      Support CloudRadar
+    </a>
+
+    <div class="settings-version-row">
+      <span>CloudRadar</span>
+      <span class="settings-version-badge">v2.0.2</span>
+    </div>
+  </div>
+
+  <footer class="footer">
+    <a href="https://status.aws.amazon.com" target="_blank" rel="noopener" class="footer-link">AWS</a>
+    <span class="footer-sep">·</span>
+    <a href="https://status.cloud.google.com" target="_blank" rel="noopener" class="footer-link">GCP</a>
+    <span class="footer-sep">·</span>
+    <a href="https://azure.status.microsoft/en-us/status" target="_blank" rel="noopener" class="footer-link">Azure</a>
+    <span class="footer-spacer"></span>
+    <a href="https://ko-fi.com/zaicone" target="_blank" rel="noopener" class="footer-link footer-donate" title="Support CloudRadar">♥ Donate</a>
+    <span class="footer-sep">·</span>
+    <span class="footer-version">v2.0.2</span>
+  </footer>
+
+</div>
+
+<script src="popup.js" defer></script>
+</body>
+</html>
